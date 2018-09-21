@@ -275,7 +275,7 @@ class Param:
             if "applicatie" in pardic:
                 appl_node = Application(self.ns).get_node(pardic["applicatie"])
                 # props["applicatie"] = pardic["applicatie"].lower().replace(" ", "")
-                self.ns.create_relation(appl_node, appl2param, param_node)
+                self.ns.create_relation(param_node, param2appl, appl_node)
             return param_node
 
 
@@ -503,5 +503,5 @@ class Visitor:
             self.ns.create_relation(visitor_node, visitor2clientip, clientip_node)
             if rec.user != "unauthenticated":
                 user_node = User(self.ns).get_node(rec)
-                self.ns.create_relation(visitor_node, visitor2user, user_node)
+                self.ns.create_relation(user_node, user2visitor, visitor_node)
             return visitor_node

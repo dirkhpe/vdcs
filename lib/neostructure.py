@@ -3,29 +3,31 @@ nodes = ["clientips", "ikls", "sessions", "users", "vacatures", "vhosts", "visit
 # Node
 lbl_application = "Applicatie"
 lbl_logrecord = "Log"
-lbl_clientip = "ClientIp"
-lbl_ikl = "Client"
+lbl_clientip = "IP"
+lbl_ikl = "Burger"
 lbl_param = "Filter"
-lbl_session = "Session"
+lbl_session = "Sessie"
 lbl_user = "User"
 lbl_vacature = "Vacature"
-lbl_vhost = "Vhost"
-lbl_vhostip = "VhostIp"
+lbl_vhost = "Vhost"         # Do not use Vhost
+lbl_vhostip = "VhostIp"     # Do not use VhostIp
 lbl_visitor = "Visitor"
+lbl_zoekwoord = "Zoekwoord"
 
 # Relations
-appl2param = "hasFilter"
+ikl2user = "heeftUsername"
+param2appl = "vanApplicatie"
 session2clientip = "fromDevice"
-session2ikl = "checkIkl"
+session2ikl = "bekeekKandidaat"
 session2logrecord = "sesLog"
-session2param = "usedFilter"
-session2vacature = "interest"
-session2vhost = "forHost"
-user2ikl = "hasIkl"
-visitor2clientip = "onDevice"
+session2param = "gebruikteFilter"
+session2vacature = "bekeekVacature"
+session2vhost = "forHost"   # Do not use session2vhost
+session2zoekwoord = "gebruiktZoekwoord"
+user2visitor = "heeftVisitor"
+visitor2clientip = "heeftIP"
 visitor2logrecord = "visLog"
-visitor2session = "hasSession"
-visitor2user = "isUser"
+visitor2session = "heeftSessie"
 vhost2vhostip = "hasIp"
 
 # SQLite configuration

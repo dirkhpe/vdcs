@@ -136,8 +136,8 @@ for rec in query.all():
     # Get session. The session will optionally create and link to the visitor.
     session_node = session.get_node(rec)
     # Link to vhost
-    vhost_node = vhost.get_node(rec)
-    ns.create_relation(session_node, session2vhost, vhost_node)
+    # vhost_node = vhost.get_node(rec)
+    # ns.create_relation(session_node, session2vhost, vhost_node)
     # Click behaviour will be linked to the session. I'm not interested in repeated behaviour, I want to understand
     # specific behaviour.
     for key in urlpath_starters:

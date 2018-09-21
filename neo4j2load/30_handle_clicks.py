@@ -26,7 +26,7 @@ def vindeenjobopl():
     """
     path_arr = rec["urlpath"].split("/")
     applicatie = path_arr[2]
-    source = applicatie
+    # source = applicatie
     ts = rec["timestamp"]
     if (applicatie == "vindeenopleiding") or (len(path_arr) == 4):
         # Investigate Query
@@ -36,10 +36,10 @@ def vindeenjobopl():
                 pd = dict(applicatie=applicatie,
                           key=param_name,
                           value=param_value)
-                pn = param_obj.get_node(pd)
+                pn, rel = param_obj.get_node(pd)
                 if pn:
                     # Link session to parameter
-                    rel_obj.set(session_node, session2param, pn, source=applicatie, ts=ts)
+                    rel_obj.set(session_node, rel, pn, source=applicatie, ts=ts)
     elif (applicatie != "vindeenopleiding") and (len(path_arr) == 5):
         if "?" in path_arr[4]:
             vac_id, urlquery = path_arr[4].split("?")
@@ -49,7 +49,7 @@ def vindeenjobopl():
         vac_node = vacature_obj.get_node(vac_id)
         if vac_node:
             # Link session to vacature
-            rel_obj.set(session_node, session2vacature, vac_node, source=source, ts=ts)
+            rel_obj.set(session_node, session2vacature, vac_node, source=applicatie, ts=ts)
     return
 
 def werkgever():
@@ -140,7 +140,7 @@ for row in df.iterrows():
         value=xl["ParameterWaarde"],
         definitie=xl["Functionele definitie"]
     )
-    param_node = param_obj.get_node(pardic)
+    param_node, rel = param_obj.get_node(pardic)
 
 
 # Now handle all log records.
@@ -162,9 +162,9 @@ for rec in res:
     session_node = session_obj.get_node(rec)
 
     # Get vhost
-    vhost_node = vhost_obj.get_node(rec)
+    # vhost_node = vhost_obj.get_node(rec)
     # Link Session to Vhost
-    rel_obj.set(session_node, session2vhost, vhost_node)
+    # rel_obj.set(session_node, session2vhost, vhost_node)
 
     # Click behaviour will be linked to the session. I'm not interested in repeated behaviour, I want to understand
     # specific behaviour.

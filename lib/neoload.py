@@ -4,6 +4,7 @@ This should allow to speed up the Neo4J load process.
 This library is using direct (dictionary) SQL results, not sqlalchemy results.
 """
 
+from datetime import datetime
 from lib.neostructure import *
 from lib import my_env
 
@@ -24,7 +25,7 @@ class Application:
         node_id = self.get_application_id(appl_name)
         if node_id not in self.applications:
             lbl = lbl_application
-            props = {":ID": node_id, ":LABEL": lbl, "name": self.get_application_name(appl_name)}
+            props = {":ID": node_id, ":LABEL": lbl, "naam": self.get_application_name(appl_name)}
             self.applications[node_id] = props
         return node_id
 
@@ -36,7 +37,7 @@ class Application:
         return cs(appl_name).replace(" ", "")
 
 def get_applications_header():
-    return [":LABEL", ":ID", "name"]
+    return [":LABEL", ":ID", "naam"]
 
 class Clientip:
     def __init__(self, repo):
@@ -47,7 +48,7 @@ class Clientip:
         if node_id not in self.clientips:
             ip = cs(rec["clientip"])
             lbl = lbl_clientip
-            props = {":ID": node_id, ":LABEL": lbl, "ip": ip}
+            props = {":ID": node_id, ":LABEL": lbl, "adres": ip}
             self.clientips[node_id] = props
         return node_id
 
@@ -56,7 +57,7 @@ class Clientip:
         return "{lbl}|{val}".format(lbl=lbl_clientip, val=cs(rec["clientip"]))
 
 def get_clientips_header():
-    return [":LABEL", ":ID", "ip"]
+    return [":LABEL", ":ID", "adres"]
 
 class Ikl:
     def __init__(self, repo):
@@ -101,27 +102,42 @@ class Param:
         :param pardic: Parameter dictionary for the current node. 'naam' is mandatory and must be string. 'waarde' is
         mandatory. 'definitie' and 'applicatie' are optional.
 
-        :return: parameter node, or False if value could not be translated to str (not ascii)
+        :return: parameter node and relation name, or False if value could not be translated to str (not ascii)
         """
         node_id = self.get_param_id(pardic)
         if node_id:
-            if node_id not in self.parameters:
+            name, val = node_id.split("|")
+            if name == "trefwoord":
+                lbl = lbl_zoekwoord
+                rel = session2zoekwoord
+                waarde = val
+            else:
                 lbl = lbl_param
-                # I'm sure that name and val are not False here.
-                name = cs(pardic["key"])
-                val = cs(pardic["value"])
-                props = {":ID": node_id, ":LABEL": lbl, "naam": name, "waarde": val}
+                rel = session2param
+                code = val
                 if "definitie" in pardic:
-                    props["definitie"] = pardic["definitie"]
+                    waarde = pardic["definitie"]
+            if node_id not in self.parameters:
+                # I'm sure that name and val are not False here.
+                props = {":ID": node_id, ":LABEL": lbl, "naam": name}
+                try:
+                    props["waarde"] = waarde
+                except NameError:
+                    pass
+                try:
+                    props["code"] = code
+                except NameError:
+                    pass
                 self.parameters[node_id] = props
                 if 'applicatie' in pardic:
                     appl_node = self.application.get_node(pardic["applicatie"])
-                    self.relation.set(appl_node, appl2param, node_id)
-            return node_id
+                    self.relation.set(node_id, param2appl, appl_node)
+            return node_id, rel
         else:
             return False
 
-    def get_param_id(self, pardic):
+    @staticmethod
+    def get_param_id(pardic):
         lbl = cs(pardic["key"])
         val = cs(pardic["value"])
         if lbl and val:
@@ -130,7 +146,7 @@ class Param:
             return False
 
 def get_params_header():
-    return [":LABEL", ":ID", "naam", "waarde", "definitie", "applicatie"]
+    return [":LABEL", ":ID", "naam", "waarde", "code", "applicatie"]
 
 class Relation:
     def __init__(self, repo):
@@ -152,8 +168,8 @@ class Relation:
 
         :return:
         """
-        """ 
         # Disable this block to disable timestamp as a relation attribute
+        """
         if ts:
             ts = None
         """
@@ -198,8 +214,12 @@ class Session:
         if node_id not in self.sessions:
             sid = cs(rec["sid"])
             lbl = lbl_session
-            props = {":ID": node_id, ":LABEL": lbl, "sid": sid, "first:datetime": rec["first"],
-                     "last:datetime": rec["last"], "count": rec["count"]}
+            first = rec["first"]
+            last = rec["last"]
+            df = "%Y-%m-%dT%H:%M:%S"
+            dur = datetime.strptime(last, df) - datetime.strptime(first, df)
+            props = {":ID": node_id, ":LABEL": lbl, "sessieID": sid, "start:datetime": first,
+                     "stop:datetime": last, "aantalPaginas": rec["count"], "duur": dur}
             self.sessions[node_id] = props
             visitor_node = self.visitor.get_node(rec)
             self.relation.set(visitor_node, visitor2session, node_id)
@@ -210,7 +230,7 @@ class Session:
         return "{lbl}|{val}".format(lbl=lbl_session, val=cs(rec["sid"]))
 
 def get_sessions_header():
-    return [":LABEL", ":ID", "sid", "first:datetime", "last:datetime", "count"]
+    return [":LABEL", ":ID", "sessieID", "start:datetime", "stop:datetime", "aantalPaginas", "duur"]
 
 class User:
     def __init__(self, repo):
@@ -223,11 +243,11 @@ class User:
         node_id = self.get_id(uid)
         if node_id not in self.users:
             lbl = lbl_user
-            props = {":ID": node_id, ":LABEL": lbl, "name": cs(uid)}
+            props = {":ID": node_id, ":LABEL": lbl, "naam": cs(uid)}
             self.users[node_id] = props
             if uid in self.user_ext:
                 ikl_node = self.ikl.get_node(self.user_ext[uid])
-                self.relation.set(node_id, user2ikl, ikl_node)
+                self.relation.set(ikl_node, ikl2user, node_id)
         return node_id
 
     @staticmethod
@@ -235,7 +255,7 @@ class User:
         return "{lbl}|{val}".format(lbl=lbl_user, val=cs(uid))
 
 def get_users_header():
-    return [":LABEL", ":ID", "name", "group"]
+    return [":LABEL", ":ID", "naam", "group"]
 
 class Vacature:
     def __init__(self, repo):
@@ -258,7 +278,7 @@ class Vacature:
         if node_id:
             if node_id not in self.vacatures:
                 lbl = lbl_vacature
-                props = {":ID": node_id, ":LABEL": lbl, "vac_id": vac_id, "titel": ""}
+                props = {":ID": node_id, ":LABEL": lbl, "vacatureID": vac_id, "titel": ""}
                 self.vacatures[node_id] = props
             return node_id
         else:
@@ -279,7 +299,7 @@ class Vacature:
             return False
 
 def get_vacatures_header():
-    return [":LABEL", ":ID", "vac_id", "titel"]
+    return [":LABEL", ":ID", "vacatureID", "titel"]
 
 class Visitor:
     def __init__(self, repo):
@@ -293,7 +313,7 @@ class Visitor:
         if node_id not in self.visitors:
             vid = rec["vid"]
             lbl = lbl_visitor
-            props = {":ID": node_id, ":LABEL": lbl, "vid": vid}
+            props = {":ID": node_id, ":LABEL": lbl, "visitorID": vid}
             self.visitors[node_id] = props
 
             # Connect visitor to clientIp
@@ -303,7 +323,7 @@ class Visitor:
             # Connect visitor to user if authenticated
             if rec["user"] != "unauthenticated":
                 user_node = self.user.get_node(rec["user"])
-                self.relation.set(node_id, visitor2user, user_node)
+                self.relation.set(user_node, user2visitor, node_id)
 
         return node_id
 
@@ -312,7 +332,7 @@ class Visitor:
         return "{lbl}|{val}".format(lbl=lbl_visitor, val=cs(rec["vid"]))
 
 def get_visitors_header():
-    return [":LABEL", ":ID", "vid"]
+    return [":LABEL", ":ID", "visitorID"]
 
 class Vhost:
     def __init__(self, repo):
