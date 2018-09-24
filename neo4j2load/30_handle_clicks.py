@@ -36,7 +36,11 @@ def vindeenjobopl():
                 pd = dict(applicatie=applicatie,
                           key=param_name,
                           value=param_value)
-                pn, rel = param_obj.get_node(pd)
+                try:
+                    pn, rel = param_obj.get_node(pd)
+                except TypeError:
+                    logging.error("Error while parsing dictionary {pd}".format(pd=pd))
+                    pn = False
                 if pn:
                     # Link session to parameter
                     rel_obj.set(session_node, rel, pn, source=applicatie, ts=ts)
@@ -189,12 +193,12 @@ for lbl in nodes:
     # Header File
     func = eval("nl.get_{lbl}_header".format(lbl=lbl))
     fn = os.path.join(cfg["Main"]["neo4jcsv_dir"], "node_{lbl}_1.csv".format(lbl=lbl))
-    with open(fn, "w", newline="") as csvfile:
+    with open(fn, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(func())
     # Then write content file
     fn = os.path.join(cfg["Main"]["neo4jcsv_dir"], "node_{lbl}_2.csv".format(lbl=lbl))
-    with open(fn, "w", newline="") as csvfile:
+    with open(fn, "w", newline="", encoding="utf-8") as csvfile:
         func = eval("nl.get_{lbl}_header".format(lbl=lbl))
         writer = csv.DictWriter(csvfile, fieldnames=func())
         arr = eval(lbl)
@@ -202,7 +206,7 @@ for lbl in nodes:
             writer.writerow(arr[k])
 
 fn = os.path.join(cfg["Main"]["neo4jcsv_dir"], "relations.csv")
-with open(fn, "w", newline="") as csvfile:
+with open(fn, "w", newline="", encoding="utf-8") as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=nl.get_relations_header())
     writer.writeheader()
     for k in relations:

@@ -11,7 +11,7 @@ from lib.neostructure import *
 cfg = my_env.init_env("vdab", __file__)
 logging.info("Start Application")
 
-cmd = os.path.join(cfg["Graph"]["path"], "neo4j-admin.bat")
+cmd = os.path.join(cfg["Graph"]["path"], "neo4j-admin")
 args = [cmd, "import", "--database={db}".format(db=cfg["Graph"]["neo_db"])]
 nodes.append("params")
 nodes.append("applications")
