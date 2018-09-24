@@ -65,9 +65,9 @@ raw_dir = cfg["LogFiles"]["raw_dir"]
 files = []
 filenames = []
 for f in listdir(raw_dir):
-    # if "internet-ikl" in f and "pa0001" in f:
-    filenames.append(f)
-    files.append(os.path.join(raw_dir, f))
+    if "pa" == f[:2]:
+        filenames.append(f)
+        files.append(os.path.join(raw_dir, f))
 files_total = len(filenames)
 logging.info('{n} files imported.'.format(n=files_total))
 
