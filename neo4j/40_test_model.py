@@ -17,7 +17,7 @@ class TestNeoModel(unittest.TestCase):
         # A Session needs to be connected to one and only one Visitor.
         # Find sessions connected to more than one visitor
         query = """
-        match (s:Session)--(v:Visitor),
+        match (s:Sessie)--(v:Visitor),
               (s)--(w:Visitor)
         where v <> w
         return s, v, w
@@ -25,7 +25,7 @@ class TestNeoModel(unittest.TestCase):
         cur = self.ns.get_query(query)
         self.assertIsNone(cur.evaluate())
         # There should be no session without a visitor.
-        query = "match (s:Session) where not (s)<-[:hasSession]-(:Visitor) return s"
+        query = "match (s:Sessie) where not (s)<-[:heeftSessie]-(:Visitor) return s"
         cur = self.ns.get_query(query)
         self.assertIsNone(cur.evaluate())
         # Every session needs to be connected to a visitor using a for-relation
@@ -34,7 +34,7 @@ class TestNeoModel(unittest.TestCase):
         cur = self.ns.get_query(query)
         sescnt = cur.evaluate()
         # Count number of for-relations between sessions and visitors
-        query = "match (s:Session)<-[:hasSession]-(:Visitor) return count(*) as cnt"
+        query = "match (s:Session)<-[rel:heeftSessie]-(:Visitor) return count(rel) as cnt"
         cur = self.ns.get_query(query)
         relcnt = cur.evaluate()
         self.assertEqual(sescnt, relcnt)
@@ -42,8 +42,8 @@ class TestNeoModel(unittest.TestCase):
     def test_visitor2clientIp(self):
         # Each visitor needs to be connected to exactly one clientIp
         query = """
-        match (v:Visitor)-[:onDevice]->(c1:ClientIp),
-              (v)-[:onDevice]->(c2:ClientIp)
+        match (v:Visitor)-[:heeftIP]->(c1:IP),
+              (v)-[:heeftIP]->(c2:IP)
         where c1 <> c2
         return v, c1, c2
         """

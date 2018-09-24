@@ -106,7 +106,8 @@ class Param:
         """
         node_id = self.get_param_id(pardic)
         if node_id:
-            name, val = node_id.split("|")
+            name = cs(pardic["key"])
+            val = cs(pardic["value"])
             if name == "trefwoord":
                 lbl = lbl_zoekwoord
                 rel = session2zoekwoord
