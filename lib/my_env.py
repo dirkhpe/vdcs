@@ -182,6 +182,57 @@ def get_named_row(nr_name, col_hrd):
     return named_row
 
 
+def neo4j_load_param(filetype, arglist, filedir):
+    """
+    This function helps to create the arguments for "neo4jadmin load" command. Filedir has all files that have been
+    prepared. Filenames are in format "node_label_type.csv" or "rel_label_type.csv". Node and rel are fixed. Label
+    relates to the node label, or some default value for relations. type must be alphanumeric, but it is required that
+    on a sorted filelist file 00 will be the first file for the node or relation type. The 00 file will have the
+    header information.
+
+    :param filetype: Type of the file, the part before first underscore. "node" or "rel". For "node" filetype, argument
+    name will be "nodes", for "rel" type argument type will be "relationships".
+
+    :param arglist: Argument list. Entries in the list have the format --nodes=file1,file2,... or --relationships=file1,
+    file2,...
+
+    :param filedir: Directory where the files are located.
+
+    :return: argument list is updated with new elements as discovered in the function.
+    """
+    files = os.listdir(filedir)
+    if filetype == "node":
+        argname = "--nodes="
+    elif filetype == "rel":
+        argname = "--relationships="
+    else:
+        logging.critical("Unknown filetype {ft} see, don't know what to do...".format(ft=filetype))
+        sys.exit(1)
+    filetype = "{ft}_".format(ft=filetype)
+    files4type = [file for file in files if file[:len(filetype)] == filetype]
+    files4type.sort()
+    # Find first node type
+    pos = files4type[0].find("_", len(filetype)+1)
+    file_label = files4type[0][:pos]
+    file_label_list = []
+    for file in files4type:
+        # Is this another file for same file type and label?
+        if file[:len(file_label)] == file_label:
+            file_label_list.append(os.path.join(filedir, file))
+        else:
+            # Another label found - Remember information for previous label.
+            arg = argname + ",".join(file_label_list)
+            arglist.append(arg)
+            # Initialize this new node type
+            pos = file.find("_", len(filetype)+1)
+            file_label = file[:pos]
+            file_label_list = [os.path.join(filedir, file)]
+    # Remember to add last node type list to the set of arguments.
+    arg = argname + ",".join(file_label_list)
+    arglist.append(arg)
+    return
+
+
 def page_query(q, recinset=1000):
     """
     This function will run a query on a large result set. The query result will be split in pages.

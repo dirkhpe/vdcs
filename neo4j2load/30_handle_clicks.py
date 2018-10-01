@@ -41,6 +41,7 @@ def vindeenjobopl():
                 except TypeError:
                     logging.error("Error while parsing dictionary {pd}".format(pd=pd))
                     pn = False
+                    rel = False
                 if pn:
                     # Link session to parameter
                     rel_obj.set(session_node, rel, pn, source=applicatie, ts=ts)
@@ -144,7 +145,7 @@ for row in df.iterrows():
         value=xl["ParameterWaarde"],
         definitie=xl["Functionele definitie"]
     )
-    param_node, rel = param_obj.get_node(pardic)
+    param_node, rel_type = param_obj.get_node(pardic)
 
 
 # Now handle all log records.
@@ -187,17 +188,18 @@ for rec in res:
     """
 recloop.end_loop()
 
+# Write Node files.
 nodes.append("params")
 nodes.append("applications")
 for lbl in nodes:
     # Header File
     func = eval("nl.get_{lbl}_header".format(lbl=lbl))
-    fn = os.path.join(cfg["Main"]["neo4jcsv_dir"], "node_{lbl}_1.csv".format(lbl=lbl))
+    fn = os.path.join(cfg["Main"]["neo4jcsv_dir"], "node_{lbl}_00.csv".format(lbl=lbl))
     with open(fn, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(func())
     # Then write content file
-    fn = os.path.join(cfg["Main"]["neo4jcsv_dir"], "node_{lbl}_2.csv".format(lbl=lbl))
+    fn = os.path.join(cfg["Main"]["neo4jcsv_dir"], "node_{lbl}_main.csv".format(lbl=lbl))
     with open(fn, "w", newline="", encoding="utf-8") as csvfile:
         func = eval("nl.get_{lbl}_header".format(lbl=lbl))
         writer = csv.DictWriter(csvfile, fieldnames=func())
@@ -205,12 +207,17 @@ for lbl in nodes:
         for k in arr:
             writer.writerow(arr[k])
 
-fn = os.path.join(cfg["Main"]["neo4jcsv_dir"], "relations.csv")
+# Write Relation files.
+# First write Relation header
+fn = os.path.join(cfg["Main"]["neo4jcsv_dir"], "rel_main_00.csv")
+with open(fn, "w", newline="", encoding="utf-8") as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(nl.get_relations_header())
+# Then write content file
+fn = os.path.join(cfg["Main"]["neo4jcsv_dir"], "rel_main_01.csv")
 with open(fn, "w", newline="", encoding="utf-8") as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=nl.get_relations_header())
-    writer.writeheader()
     for k in relations:
         writer.writerow(relations[k])
-
 
 logging.info("End Application")

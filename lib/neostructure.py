@@ -2,6 +2,8 @@ nodes = ["clientips", "ikls", "sessions", "users", "vacatures", "vhosts", "visit
 
 # Node
 lbl_application = "Applicatie"
+lbl_competentie = "Competentie"
+lbl_course = "Opleiding"
 lbl_logrecord = "Log"
 lbl_clientip = "IP"
 lbl_ikl = "Burger"
@@ -15,6 +17,8 @@ lbl_visitor = "Visitor"
 lbl_zoekwoord = "Zoekwoord"
 
 # Relations
+course2competentie = "verkregenCompetentie"
+ikl2competentie = "heeftCompetentie"
 ikl2user = "heeftUsername"
 param2appl = "vanApplicatie"
 session2clientip = "fromDevice"
@@ -25,6 +29,7 @@ session2vacature = "bekeekVacature"
 session2vhost = "forHost"   # Do not use session2vhost
 session2zoekwoord = "gebruiktZoekwoord"
 user2visitor = "heeftVisitor"
+vacature2competentie = "gevraagdeCompetentie"
 visitor2clientip = "heeftIP"
 visitor2logrecord = "visLog"
 visitor2session = "heeftSessie"

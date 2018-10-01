@@ -3,7 +3,8 @@ This library consolidates the classes required to prepare the Neo4J csv load fil
 This should allow to speed up the Neo4J load process.
 This library is using direct (dictionary) SQL results, not sqlalchemy results.
 """
-
+import csv
+import os
 from datetime import datetime
 from lib.neostructure import *
 from lib import my_env
@@ -59,6 +60,88 @@ class Clientip:
 def get_clientips_header():
     return [":LABEL", ":ID", "adres"]
 
+class Competentie:
+    def __init__(self, repo):
+        self.competenties = repo["competentie"]
+
+    def get_node(self, comp):
+        node_id = self.get_id(comp)
+        if node_id not in self.competenties:
+            lbl = lbl_competentie
+            props = {":ID": node_id, ":LABEL": lbl, "competentieID": cs(comp["id"])}
+            try:
+                props["Beschrijving"] = comp["desc"]
+            except KeyError:
+                pass
+            self.competenties[node_id] = props
+        return node_id
+
+    @staticmethod
+    def get_id(comp):
+        return "{lbl}|{val}".format(lbl=lbl_competentie, val=cs(comp["id"]))
+
+    def populate_repo(self, cfg):
+        """
+        This method will read current competentie node file and add this to the competentie repository. I can have one
+        file only since the file will be rewritten.
+        This function should be called only on empty competentie hash.
+
+        :param cfg: Config object, to find csv file location.
+
+        :return: Populated repository
+        """
+        fn = "node_competenties_main.csv"
+        ffp = os.path.join(cfg["Main"]["neo4jcsv_dir"], fn)
+        if os.path.isfile(ffp):
+            with open(ffp, newline="") as csvfile:
+                reader = csv.DictReader(csvfile, fieldnames=get_competenties_header())
+                for row in reader:
+                    self.competenties[row[":ID"]] = dict(row)
+        return
+
+
+def get_competenties_header():
+    return [":LABEL", ":ID", "competentieID", "Beschrijving"]
+
+class Course:
+    def __init__(self, repo):
+        self.courses = repo["course"]
+
+    def get_node(self, courseid):
+        node_id = self.get_id(courseid)
+        if node_id not in self.courses:
+            lbl = lbl_course
+            props = {":ID": node_id, ":LABEL": lbl, "opleidingID": cs(courseid)}
+            self.courses[node_id] = props
+        return node_id
+
+    @staticmethod
+    def get_id(courseid):
+        return "{lbl}|{val}".format(lbl=lbl_course, val=cs(courseid))
+
+    def populate_repo(self, cfg):
+        """
+        This method will read current course node file and add this to the course repository. I can have one
+        file only since the file will be rewritten.
+        This function should be called only on empty course hash.
+
+        :param cfg: Config object, to find csv file location.
+
+        :return: Populated repository
+        """
+        fn = "node_courses_main.csv"
+        ffp = os.path.join(cfg["Main"]["neo4jcsv_dir"], fn)
+        if os.path.isfile(ffp):
+            with open(ffp, newline="") as csvfile:
+                reader = csv.DictReader(csvfile, fieldnames=get_courses_header())
+                for row in reader:
+                    self.courses[row[":ID"]] = dict(row)
+        return
+
+
+def get_courses_header():
+    return [":LABEL", ":ID", "opleidingID"]
+
 class Ikl:
     def __init__(self, repo):
         self.ikls = repo["ikl"]
@@ -74,6 +157,26 @@ class Ikl:
     @staticmethod
     def get_id(ikl):
         return "{lbl}|{val}".format(lbl=lbl_ikl, val=cs(ikl))
+
+    def populate_repo(self, cfg):
+        """
+        This method will read current ikl node file and add this to the ikl repository. I can have one
+        file only since the file will be rewritten.
+        This function should be called only on empty ikls hash.
+
+        :param cfg: Config object, to find csv file location.
+
+        :return: Populated repository
+        """
+        fn = "node_ikls_main.csv"
+        ffp = os.path.join(cfg["Main"]["neo4jcsv_dir"], fn)
+        if os.path.isfile(ffp):
+            with open(ffp, newline="") as csvfile:
+                reader = csv.DictReader(csvfile, fieldnames=get_ikls_header())
+                for row in reader:
+                    self.ikls[row[":ID"]] = dict(row)
+        return
+
 
 def get_ikls_header():
     return [":LABEL", ":ID", "ikl"]
@@ -153,7 +256,7 @@ class Relation:
     def __init__(self, repo):
         self.relations = repo["relation"]
 
-    def set(self, start_node, reltype, end_node, source=None, ts=None):
+    def set(self, start_node, reltype, end_node, source=None, ts=None, score=None):
         """
         This method will verify if a relation exists already. If not, it will be created.
 
@@ -167,6 +270,8 @@ class Relation:
 
         :param ts: Optional attribute to specify timestamp of the information
 
+        :param score: Optional - score.
+
         :return:
         """
         # Disable this block to disable timestamp as a relation attribute
@@ -174,26 +279,51 @@ class Relation:
         if ts:
             ts = None
         """
-        rel_id = self.get_rel_id(start_node, reltype, end_node, source, ts)
+        rel_id = self.get_rel_id(start_node, reltype, end_node, source, ts, score)
         if rel_id not in self.relations:
-            self.relations[rel_id] = self.get_rel_props(start_node, reltype, end_node, source, ts)
+            self.relations[rel_id] = self.get_rel_props(start_node, reltype, end_node, source, ts, score)
         return
 
     @staticmethod
-    def get_rel_id(start_node, relation, end_node, source, ts):
-        return "{sn}|{rel}|{en}|{source}|{ts}".format(sn=start_node, rel=relation, en=end_node, source=source, ts=ts)
+    def get_rel_id(start_node, relation, end_node, source, ts, score):
+        return "{sn}|{rel}|{en}|{source}|{ts}|{score}".format(sn=start_node, rel=relation, en=end_node, source=source,
+                                                              ts=ts, score=score)
 
     @staticmethod
-    def get_rel_props(start_node, relation, end_node, source, ts):
+    def get_rel_props(start_node, relation, end_node, source, ts, score):
         props = {":START_ID": start_node, ":END_ID":end_node, ":TYPE": relation}
         if source:
             props["source"] = source
         if ts:
             props["ts:datetime"] = ts
+        if score:
+            props["score"] = score
         return props
 
+
+    def populate_repo(self, cfg):
+        """
+        This method will read current relations file and add this to the relations repository. I can have one
+        file only since the file will be rewritten.
+        This function should be called only on empty relations hash.
+
+        :param cfg: Config object, to find csv file location.
+
+        :return: Populated repository
+        """
+        fn = "rel_main_01.csv"
+        ffp = os.path.join(cfg["Main"]["neo4jcsv_dir"], fn)
+        if os.path.isfile(ffp):
+            with open(ffp, newline="") as csvfile:
+                reader = csv.DictReader(csvfile, fieldnames=get_relations_header())
+                for row in reader:
+                    rel_id = self.get_rel_id(row[":START_ID"], row[":TYPE"], row[":END_ID"], row["source"],
+                                             row["ts:datetime"], row["score"])
+                    self.relations[rel_id] = dict(row)
+        return
+
 def get_relations_header():
-    return [":START_ID", ":END_ID", ":TYPE", "source", "ts:datetime"]
+    return [":START_ID", ":END_ID", ":TYPE", "source", "ts:datetime", "score"]
 
 
 class Session:
@@ -298,6 +428,27 @@ class Vacature:
             return "{lbl}|{val}".format(lbl=lbl_vacature, val=vac_id)
         else:
             return False
+
+
+    def populate_repo(self, cfg):
+        """
+        This method will read current vacature node file and add this to the vacature repository. I can have one
+        file only since the file will be rewritten.
+        This function should be called only on empty vacatures hash.
+
+        :param cfg: Config object, to find csv file location.
+
+        :return: Populated repository
+        """
+        fn = "node_vacatures_main.csv"
+        ffp = os.path.join(cfg["Main"]["neo4jcsv_dir"], fn)
+        if os.path.isfile(ffp):
+            with open(ffp, newline="") as csvfile:
+                reader = csv.DictReader(csvfile, fieldnames=get_vacatures_header())
+                for row in reader:
+                    self.vacatures[row[":ID"]] = dict(row)
+        return
+
 
 def get_vacatures_header():
     return [":LABEL", ":ID", "vacatureID", "titel"]
