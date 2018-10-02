@@ -27,7 +27,7 @@ logging.info("I know about {c1} ikls, {c2} competenties and {c3} relations".form
                                                                                    c2=len(competenties),
                                                                                    c3=len(relations)))
 
-ffp = "C:\\ProjectsWorkspace\\VDAB\\data\\competenties\\ikl_competenties.csv"
+ffp = cfg["Data"]["burger_comp"]
 fieldnames = ["IKL", "GEBRUIKERSNAAM", "KLANT_ID", "GESCOORDECOMPETENTIE_ID", "CODE", "SCORE"]
 csv.register_dialect('tabdelim', delimiter=';')
 li = my_env.LoopInfo("IKL-Competences", 5000)

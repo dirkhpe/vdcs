@@ -27,7 +27,7 @@ logging.info("I know about {c1} vacatures, {c2} competenties and {c3} relations"
                                                                                         c2=len(competenties),
                                                                                         c3=len(relations)))
 
-ffp = "C:\\ProjectsWorkspace\\VDAB\\data\\competenties\\vac_competenties.csv"
+ffp = cfg["Data"]["vac_comp"]
 fieldnames = ["VAC_OPENING_ID", "COMP_CODE"]
 csv.register_dialect('tabdelim', delimiter=';')
 li = my_env.LoopInfo("Vacature-Competences", 5000)
