@@ -11,37 +11,37 @@ from lib.neostructure import *
 # Initialize environment
 cfg = my_env.init_env("vdab", __file__)
 competenties = {}
-ikls = {}
+courses = {}
 relations = {}
 repo = dict(competentie=competenties,
-            ikl=ikls,
+            course=courses,
             relation=relations)
-ikl_obj = nl.Ikl(repo)
+course_obj = nl.Course(repo)
 comp_obj = nl.Competentie(repo)
 rel_obj = nl.Relation(repo)
 # Collect current information from Burgers
-ikl_obj.populate_repo(cfg)
+course_obj.populate_repo(cfg)
 comp_obj.populate_repo(cfg)
 rel_obj.populate_repo(cfg)
-logging.info("I know about {c1} ikls, {c2} competenties and {c3} relations".format(c1=len(ikls),
-                                                                                   c2=len(competenties),
-                                                                                   c3=len(relations)))
+logging.info("I know about {c1} courses, {c2} competenties and {c3} relations".format(c1=len(courses),
+                                                                                       c2=len(competenties),
+                                                                                       c3=len(relations)))
 
-ffp = cfg["Data"]["burger_comp"]
-fieldnames = ["IKL", "GEBRUIKERSNAAM", "KLANT_ID", "GESCOORDECOMPETENTIE_ID", "CODE", "SCORE"]
-csv.register_dialect('tabdelim', delimiter=';')
-li = my_env.LoopInfo("IKL-Competences", 5000)
-with open(ffp, newline="") as csvfile:
-    reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect='tabdelim', encoding='utf-8')
+ffp = cfg["Data"]["opleiding_comp"]
+fieldnames = ["COURSE_ID", "COMPETENCE_ID", "COMPETENCE_DESCRIPTION"]
+csv.register_dialect('tabdelim', delimiter='|')
+li = my_env.LoopInfo("Course-Competences", 5000)
+with open(ffp, newline="", encoding='utf-8') as csvfile:
+    reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect='tabdelim')
     for row in reader:
         li.info_loop()
-        ikl_node = ikl_obj.get_node(row["IKL"])
-        comp_dic = dict(id=row["CODE"])
+        course_node = course_obj.get_node(row["COURSE_ID"])
+        comp_dic = dict(id=row["COMPETENCE_ID"], desc=row["COMPETENCE_DESCRIPTION"])
         comp_node = comp_obj.get_node(comp_dic)
-        rel_obj.set(ikl_node, ikl2competentie, comp_node, score=row["SCORE"])
+        rel_obj.set(course_node, course2competentie, comp_node)
 li.end_loop()
 
-for lbl in ["ikls", "competenties"]:
+for lbl in ["courses", "competenties"]:
     # Header File
     func = eval("nl.get_{lbl}_header".format(lbl=lbl))
     fn = os.path.join(cfg["Main"]["neo4jcsv_dir"], "node_{lbl}_00.csv".format(lbl=lbl))
