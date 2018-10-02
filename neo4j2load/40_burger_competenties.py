@@ -32,7 +32,7 @@ fieldnames = ["IKL", "GEBRUIKERSNAAM", "KLANT_ID", "GESCOORDECOMPETENTIE_ID", "C
 csv.register_dialect('tabdelim', delimiter=';')
 li = my_env.LoopInfo("IKL-Competences", 5000)
 with open(ffp, newline="") as csvfile:
-    reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect='tabdelim')
+    reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect='tabdelim', encoding='utf-8')
     for row in reader:
         li.info_loop()
         ikl_node = ikl_obj.get_node(row["IKL"])

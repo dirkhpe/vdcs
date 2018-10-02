@@ -32,7 +32,7 @@ fieldnames = ["VAC_OPENING_ID", "COMP_CODE"]
 csv.register_dialect('tabdelim', delimiter=';')
 li = my_env.LoopInfo("Vacature-Competences", 5000)
 with open(ffp, newline="") as csvfile:
-    reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect='tabdelim')
+    reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect='tabdelim', encoding='utf-8')
     for row in reader:
         li.info_loop()
         vac_node = vac_obj.get_node(row["VAC_OPENING_ID"])
