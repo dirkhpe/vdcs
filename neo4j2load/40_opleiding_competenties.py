@@ -28,11 +28,11 @@ logging.info("I know about {c1} courses, {c2} competenties and {c3} relations".f
                                                                                        c3=len(relations)))
 
 ffp = cfg["Data"]["opleiding_comp"]
-fieldnames = ["COURSE_ID", "COMPETENCE_ID", "COMPETENCE_DESCRIPTION"]
+# fieldnames = ["COURSE_ID", "COMPETENCE_ID", "COMPETENCE_DESCRIPTION"]
 csv.register_dialect('tabdelim', delimiter='|')
 li = my_env.LoopInfo("Course-Competences", 5000)
 with open(ffp, newline="", encoding='utf-8') as csvfile:
-    reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect='tabdelim')
+    reader = csv.DictReader(csvfile, dialect='tabdelim')
     for row in reader:
         li.info_loop()
         course_node = course_obj.get_node(row["COURSE_ID"])

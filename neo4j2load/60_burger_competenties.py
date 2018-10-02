@@ -28,11 +28,11 @@ logging.info("I know about {c1} ikls, {c2} competenties and {c3} relations".form
                                                                                    c3=len(relations)))
 
 ffp = cfg["Data"]["burger_comp"]
-fieldnames = ["IKL", "GEBRUIKERSNAAM", "KLANT_ID", "GESCOORDECOMPETENTIE_ID", "CODE", "SCORE"]
+# fieldnames = ["IKL", "GEBRUIKERSNAAM", "KLANT_ID", "GESCOORDECOMPETENTIE_ID", "CODE", "SCORE"]
 csv.register_dialect('tabdelim', delimiter=';')
 li = my_env.LoopInfo("IKL-Competences", 5000)
 with open(ffp, newline="", encoding='utf-8') as csvfile:
-    reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect='tabdelim')
+    reader = csv.DictReader(csvfile, dialect='tabdelim')
     for row in reader:
         li.info_loop()
         ikl_node = ikl_obj.get_node(row["IKL"])

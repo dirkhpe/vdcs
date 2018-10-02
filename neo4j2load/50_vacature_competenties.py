@@ -28,11 +28,11 @@ logging.info("I know about {c1} vacatures, {c2} competenties and {c3} relations"
                                                                                         c3=len(relations)))
 
 ffp = cfg["Data"]["vac_comp"]
-fieldnames = ["VAC_OPENING_ID", "COMP_CODE"]
+# fieldnames = ["VAC_OPENING_ID", "COMP_CODE"]
 csv.register_dialect('tabdelim', delimiter=';')
 li = my_env.LoopInfo("Vacature-Competences", 5000)
 with open(ffp, newline="", encoding='utf-8') as csvfile:
-    reader = csv.DictReader(csvfile, fieldnames=fieldnames, dialect='tabdelim')
+    reader = csv.DictReader(csvfile, dialect='tabdelim')
     for row in reader:
         li.info_loop()
         vac_node = vac_obj.get_node(row["VAC_OPENING_ID"])
