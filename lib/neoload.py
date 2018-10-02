@@ -93,7 +93,7 @@ class Competentie:
         fn = "node_competenties_main.csv"
         ffp = os.path.join(cfg["Main"]["neo4jcsv_dir"], fn)
         if os.path.isfile(ffp):
-            with open(ffp, newline="") as csvfile:
+            with open(ffp, newline="", encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile, fieldnames=get_competenties_header())
                 for row in reader:
                     self.competenties[row[":ID"]] = dict(row)
@@ -132,7 +132,7 @@ class Course:
         fn = "node_courses_main.csv"
         ffp = os.path.join(cfg["Main"]["neo4jcsv_dir"], fn)
         if os.path.isfile(ffp):
-            with open(ffp, newline="") as csvfile:
+            with open(ffp, newline="", encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile, fieldnames=get_courses_header())
                 for row in reader:
                     self.courses[row[":ID"]] = dict(row)
@@ -171,7 +171,7 @@ class Ikl:
         fn = "node_ikls_main.csv"
         ffp = os.path.join(cfg["Main"]["neo4jcsv_dir"], fn)
         if os.path.isfile(ffp):
-            with open(ffp, newline="") as csvfile:
+            with open(ffp, newline="", encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile, fieldnames=get_ikls_header())
                 for row in reader:
                     self.ikls[row[":ID"]] = dict(row)
@@ -314,7 +314,7 @@ class Relation:
         fn = "rel_main_01.csv"
         ffp = os.path.join(cfg["Main"]["neo4jcsv_dir"], fn)
         if os.path.isfile(ffp):
-            with open(ffp, newline="") as csvfile:
+            with open(ffp, newline="", encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile, fieldnames=get_relations_header())
                 for row in reader:
                     rel_id = self.get_rel_id(row[":START_ID"], row[":TYPE"], row[":END_ID"], row["source"],
@@ -443,7 +443,7 @@ class Vacature:
         fn = "node_vacatures_main.csv"
         ffp = os.path.join(cfg["Main"]["neo4jcsv_dir"], fn)
         if os.path.isfile(ffp):
-            with open(ffp, newline="") as csvfile:
+            with open(ffp, newline="", encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile, fieldnames=get_vacatures_header())
                 for row in reader:
                     self.vacatures[row[":ID"]] = dict(row)
