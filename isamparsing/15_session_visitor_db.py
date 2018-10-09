@@ -16,7 +16,33 @@ cdb = sqlstore.DirectConn(cfg)
 cdb.connect2db()
 sessions = {}
 visitors = {}
+logsmin = {}
 session_timeout = timedelta(minutes=30)
+bot_timeout = timedelta(minutes=1)
+logcnt = 48
+
+if __name__ == '__main__':
+    def check_for_bot(logarray, logtime):
+        """
+        This method will check if the session is a bot. This is the case if there were more than 48 log records per minute.
+
+        :param logarray: Array containing datetime objects for previous logs
+
+        :param logtime: datetime object for the current log.
+
+        :return: "Yes" if this session appears to be a bot. "No" if the session does not appear to be a bot.
+        """
+        # First append current logtime to the session
+        logarray.append(logtime)
+        if len(logarray) < logcnt:
+            # I'm sure it's not a bot
+            return "No"
+        else:
+            logarray = [x for x in logarray if logtime - x <= bot_timeout]
+            if len(logarray) < logcnt:
+                return "No"
+            else:
+                return "Yes"
 
 # Walk through all records - order by timestamp and clickID
 query = "SELECT * FROM {ct} ORDER BY timestamp, id".format(ct=clicks_tbl)
@@ -57,11 +83,13 @@ for rec in res:
             visitor_id=visitor_id,
             first=timestamp,
             last=timestamp,
+            bot="No",
             count=0
         )
         session_id = cdb.insert_row(session_tbl, session_rec)
         session_rec["id"] = session_id
         sessions[str(visitor_id)] = session_rec
+        logsmin[str(visitor_id)] = []
     # Session record is available - Check if session is still valid
     last_dt = datetime.strptime(session_rec["last"], "%Y-%m-%dT%H:%M:%S")
     current_dt = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
@@ -72,15 +100,20 @@ for rec in res:
             visitor_id=visitor_id,
             first=timestamp,
             last=timestamp,
+            bot="No",
             count=1
         )
         session_id = cdb.insert_row(session_tbl, session_rec)
         session_rec["id"] = session_id
         sessions[str(visitor_id)] = session_rec
+        # Add timestamp to logsmin
+        logsmin[str(visitor_id)] = [current_dt]
     else:
         # Continue current session:
         session_rec["count"] += 1
         session_rec["last"] = timestamp
+        if session_rec["bot"] == "No":
+            session_rec["bot"] = check_for_bot(logsmin[str(visitor_id)], current_dt)
     # Create log to session record
     click2session = dict(
         click_id=log_id,

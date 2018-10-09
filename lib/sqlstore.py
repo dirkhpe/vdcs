@@ -67,6 +67,7 @@ class Session(Base):
     visitor_id = Column(Integer, ForeignKey('visitors.id'))
     first = Column(Text, nullable=False)
     last = Column(Text, nullable=False)
+    bot = Column(Text)
     count = Column(Integer, nullable=False)
     session4visitor = relationship("Visitor", backref="inSessions")
     clicksPerSession = relationship("Click", secondary="click2session", backref="sess4click")
