@@ -282,8 +282,11 @@ class LoopInfo:
         """
         Initialization of FOR loop information handling. Start message is printed for attribname. Information progress
         message will be printed for every triggercnt iterations.
+
         :param attribname:
+
         :param triggercnt:
+
         :return:
         """
         self.rec_cnt = 0
@@ -311,4 +314,4 @@ class LoopInfo:
     def end_loop(self):
         curr_time = datetime.now().strftime("%H:%M:%S")
         print("{0} - {1} {2} handled - End.\n".format(curr_time, str(self.rec_cnt), str(self.attribname)))
-        return
+        return self.rec_cnt
