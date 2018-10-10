@@ -5,6 +5,7 @@ string and find the distinct urlquery keywords.
 
 import argparse
 import logging
+import os
 from lib import my_env
 from lib import sqlstore
 from urllib import parse
@@ -35,5 +36,9 @@ for rec in res:
         except KeyError:
             keycnt[k] = 1
 total = lc.end_loop()
+resfn = os.path.join(cfg["Main"]["logdir"], "keycnt.csv")
+resfile = open(resfn, "w")
+resfile.write("Key;Count;Pct\n")
 for k in sorted(keycnt, key=keycnt.get, reverse=True):
-    print("{k}: {cnt} ({pct:.2f})%".format(k=k, cnt=keycnt[k], pct=(keycnt[k]*100/total)))
+    resfile.write("{k};{cnt};{pct:.2f}\n".format(k=k, cnt=keycnt[k], pct=(keycnt[k]*100/total)))
+resfile.close()
