@@ -1,6 +1,6 @@
 """
 This script will accept a urlpath start string, a minimum length and a maximum length.
-It will find the three examples of urlpath for every length. The result will be printed to a text file.
+It will find the three distinct examples of urlpath for every length. The result will be printed to a text file.
 """
 
 import argparse
@@ -47,16 +47,18 @@ for rec in res:
     path = parse.urlparse(rec["urlpath"]).path
     path_arr = path.split("/")
     k = "len{cnt}".format(cnt=len(path_arr))
-    try:
-        pathcnt[k] += 1
-        resarr.append(rec["urlpath"])
-        if pathcnt[k] >= 3:
-            pathcnt.pop(k)
-    except KeyError:
-        # This is a length we don't care about (anymore)
-        pass
-    if len(pathcnt) == 0:
-        break
+    # Find distinct strings only
+    if rec["urlpath"] not in resarr:
+        try:
+            pathcnt[k] += 1
+            resarr.append(rec["urlpath"])
+            if pathcnt[k] >= 3:
+                pathcnt.pop(k)
+        except KeyError:
+            # This is a length we don't care about (anymore)
+            pass
+        if len(pathcnt) == 0:
+            break
 total = lc.end_loop()
 resfn = os.path.join(cfg["Main"]["logdir"], "urlpath.txt")
 resfile = open(resfn, "w")
