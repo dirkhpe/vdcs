@@ -17,6 +17,25 @@ wl_vindeenjob = ["arbeidsregime", "jobdomein", "ervaring", "arbeidscircuit", "ar
                  "diplomaniveau", "vakgebieden", "doelgroep", "leervorm", "lesvorm", "organisator",
                  "knelpuntberoep", "trefwoord"]
 
+def opleidingaanbod():
+    """
+    This method handles queries with urlpath starter /opleidingen/aanbod/. Third element in the path is the course ID
+    if it exist and if it is not equal to 'opleidingen'. (in a few cases the URL is
+    /opleidingen/aanbod/opleidingen/aanbod. These cases are ignored for now.
+
+    :return:
+    """
+    applicatie = "vindeenopleiding"
+    ts = rec["timestamp"]
+    path = parse.urlparse(rec["urlpath"]).path
+    path_arr = path.split("/")
+    if len(path_arr) > 3:
+        courseId = path_arr[3]
+        if courseId:
+            course_node = course_obj.get_node(courseId)
+            rel_obj.set(session_node, session2course, course_node, source=applicatie, ts=ts)
+    return
+
 def vindeenjobopl():
     """
     This method will handle query and vacature ID request. A query has 3 / in the path, a vacature has 4 / and last one
@@ -103,6 +122,7 @@ urlpath_starters = my_env.urlpath_starters
 # Initialize node and relations dictionaries
 applications = {}
 clientips = {}
+courses = {}
 ikls = {}
 params = {}
 sessions = {}
@@ -113,6 +133,7 @@ visitors = {}
 relations = {}
 repo = dict(application=applications,
             clientip=clientips,
+            course=courses,
             ikl=ikls,
             param=params,
             session=sessions,
@@ -125,6 +146,7 @@ repo = dict(application=applications,
 
 # Initialize objects
 appl_obj = nl.Application(repo)
+course_obj = nl.Course(repo)
 ikl_obj = nl.Ikl(repo)
 param_obj = nl.Param(repo)
 session_obj = nl.Session(repo)
@@ -151,7 +173,7 @@ for row in df.iterrows():
 # Now handle all log records.
 query = """
 select c.id, c.clientip, c.urlpath, c.urlquery, c.auth, c.user, c.vhost, c.timestamp,
-       v.id vid, s.id sid, s.count, s.first, s.last
+       v.id vid, s.id sid, s.count, s.first, s.last, s.bot
 from clicks c
 inner join click2visitor cv on cv.click_id = c.id
 inner join visitors v on v.id = cv.visitor_id

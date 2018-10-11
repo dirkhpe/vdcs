@@ -21,28 +21,32 @@ session_timeout = timedelta(minutes=30)
 bot_timeout = timedelta(minutes=1)
 logcnt = 48
 
-if __name__ == '__main__':
-    def check_for_bot(logarray, logtime):
-        """
-        This method will check if the session is a bot. This is the case if there were more than 48 log records per minute.
+def check_for_bot(logarray, logtime):
+    """
+    This method will check if the session is a bot. This is the case if there were more than 48 log records per minute.
 
-        :param logarray: Array containing datetime objects for previous logs
+    :param logarray: Array containing datetime objects for previous logs
 
-        :param logtime: datetime object for the current log.
+    :param logtime: datetime object for the current log.
 
-        :return: "Yes" if this session appears to be a bot. "No" if the session does not appear to be a bot.
-        """
-        # First append current logtime to the session
-        logarray.append(logtime)
+    :return: "Yes" if this session appears to be a bot. "No" if the session does not appear to be a bot.
+    """
+    # First append current logtime to the session
+    logarray.append(logtime)
+    if len(logarray) < logcnt:
+        # I'm sure it's not a bot
+        return "No"
+    else:
+        logarray = [x for x in logarray if logtime - x <= bot_timeout]
         if len(logarray) < logcnt:
-            # I'm sure it's not a bot
             return "No"
         else:
-            logarray = [x for x in logarray if logtime - x <= bot_timeout]
-            if len(logarray) < logcnt:
-                return "No"
-            else:
-                return "Yes"
+            return "Yes"
+
+# Clean session and visitor tables
+for table in [click2session_tbl, click2visitor_tbl, session_tbl, visitor_tbl]:
+    query = "DELETE FROM {t}".format(t=table)
+    cdb.run_query(query)
 
 # Walk through all records - order by timestamp and clickID
 query = "SELECT * FROM {ct} ORDER BY timestamp, id".format(ct=clicks_tbl)

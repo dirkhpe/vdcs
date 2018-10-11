@@ -171,6 +171,17 @@ class DirectConn:
         engine = set_engine(conn_string=conn_string)
         Base.metadata.create_all(engine)
 
+    def run_query(self, query):
+        """
+        This method will run a query and not return any value. This can be used for CREATE TABLE or DELETE statements
+
+        :param query:
+
+        :return:
+        """
+        self.cur.execute(query)
+        return
+
     def update_row(self, tn, rowdict):
         """
         This method will update the record with ID rowdict["id"] with the values for columns as specified in dictionary

@@ -1,4 +1,4 @@
-nodes = ["clientips", "ikls", "sessions", "users", "vacatures", "vhosts", "visitors"]
+nodes = ["clientips", "ikls", "sessions", "users", "vacatures", "vhosts", "visitors", "courses"]
 
 # Node
 lbl_application = "Applicatie"
@@ -22,6 +22,7 @@ ikl2competentie = "heeftCompetentie"
 ikl2user = "heeftUsername"
 param2appl = "vanApplicatie"
 session2clientip = "fromDevice"
+session2course = ":bekeekOpleiding"
 session2ikl = "bekeekKandidaat"
 session2logrecord = "sesLog"
 session2param = "gebruikteFilter"

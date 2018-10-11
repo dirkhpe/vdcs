@@ -22,7 +22,7 @@ urlpath_starters = {"/api/vindeenjob/vacatures": "vindeenjobopl",
                     "/vac/werkgever/mijnkandidaten.do": "werkgever",
                     "/vac/werkgever/mijnjobs.do": "werkgever",
                     "/vac/werkgever/mijnwerknemerzoeken.do": "werkgever",
-                    "/opleidingen/aanbod": "tobedefined"}
+                    "/opleidingen/aanbod": "opleidingaanbod"}
 #                    "/jobs/vacatures": "jobs_vacatures",
 #                    "/js/collect.js?action": "collect_action"}
 
