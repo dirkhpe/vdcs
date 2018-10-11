@@ -350,7 +350,7 @@ class Session:
             df = "%Y-%m-%dT%H:%M:%S"
             dur = datetime.strptime(last, df) - datetime.strptime(first, df)
             props = {":ID": node_id, ":LABEL": lbl, "sessieID": sid, "start:datetime": first,
-                     "stop:datetime": last, "aantalPaginas": rec["count"], "duur": dur}
+                     "stop:datetime": last, "aantalPaginas": rec["count"], "duur": dur, "bot": rec["bot"]}
             self.sessions[node_id] = props
             visitor_node = self.visitor.get_node(rec)
             self.relation.set(visitor_node, visitor2session, node_id)
@@ -361,7 +361,7 @@ class Session:
         return "{lbl}|{val}".format(lbl=lbl_session, val=cs(rec["sid"]))
 
 def get_sessions_header():
-    return [":LABEL", ":ID", "sessieID", "start:datetime", "stop:datetime", "aantalPaginas", "duur"]
+    return [":LABEL", ":ID", "sessieID", "start:datetime", "stop:datetime", "aantalPaginas", "duur", "bot"]
 
 class User:
     def __init__(self, repo):

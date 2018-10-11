@@ -24,7 +24,7 @@ cdb = sqlstore.DirectConn(cfg)
 cdb.connect2db()
 
 keycnt = {}
-query = 'SELECT urlquery FROM clicks WHERE urlpath like "{urlpath}%"'.format(urlpath=args.urlpath)
+query = 'SELECT urlpath, urlquery FROM clicks WHERE urlpath like "{urlpath}%"'.format(urlpath=args.urlpath)
 res = cdb.get_query(query)
 lc = my_env.LoopInfo("Query filters", 50)
 for rec in res:
@@ -35,6 +35,14 @@ for rec in res:
             keycnt[k] += 1
         except KeyError:
             keycnt[k] = 1
+    # Get length of path
+    path = parse.urlparse(rec["urlpath"]).path
+    path_arr = path.split("/")
+    k = "length_{cnt}".format(cnt=len(path_arr))
+    try:
+        keycnt[k] += 1
+    except KeyError:
+        keycnt[k] = 1
 total = lc.end_loop()
 resfn = os.path.join(cfg["Main"]["logdir"], "keycnt.csv")
 resfile = open(resfn, "w")

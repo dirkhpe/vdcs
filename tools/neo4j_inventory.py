@@ -1,5 +1,5 @@
 """
-This script will collect the Neo4J Inventory
+This script will collect the Neo4J Inventory. Number of nodes per label and number of relation types.
 """
 import datetime
 import os
