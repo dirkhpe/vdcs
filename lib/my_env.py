@@ -112,24 +112,22 @@ def init_loghandler(config, modulename):
 
 def cleanstr(val):
     """
-    This module will clean a value to a lowercase string, or return False if not possible.
-    Leading and trailing blanks will be removed from the string.
-    The val needs to be ascii. If it is not ascii, then val will be rejected.
+    This module return val as a lowercase string without leading or trailing blanks. So integers or floats will be
+    converted to string.
+    The value must be ascii coded, otherwise False will be returned.
 
     :param val:
 
-    :return: val as string in lowercase, or False
+    :return: val as string in lowercase ascii code no leading or trailing characters, or False
     """
+    wip = str(val)
     try:
-        if isinstance(val, str):
-            val.encode("ascii")
-            val = val.strip().lower()
-        else:
-            val = str(val)
+        wip.encode("ascii")
     except UnicodeEncodeError:
         # I only want values as ascii character string.
-        pass
-    return val
+        return False
+    else:
+        return wip.strip().lower()
 
 def get_inifile(projectname):
     """
