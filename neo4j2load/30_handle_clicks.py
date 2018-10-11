@@ -14,7 +14,7 @@ from urllib import parse
 
 
 wl_vindeenjob = ["arbeidsregime", "jobdomein", "ervaring", "arbeidscircuit", "arbeidsduur", "internationaal",
-                 "diplomaniveau", "vakgebieden", "doelgroepen", "leervorm", "lesvorm", "organisator",
+                 "diplomaniveau", "vakgebieden", "doelgroep", "leervorm", "lesvorm", "organisator",
                  "knelpuntberoep", "trefwoord"]
 
 def vindeenjobopl():
