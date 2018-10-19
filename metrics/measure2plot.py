@@ -8,6 +8,7 @@ import logging
 import matplotlib.pyplot as plt
 import os
 import pandas
+import pytz
 from lib import my_env
 
 parser = argparse.ArgumentParser(
@@ -22,6 +23,11 @@ args = parser.parse_args()
 
 starttime = args.startTime
 duration = args.duration
+if starttime:
+    # Convert starttime to UTC
+    # Get timezone delta
+    tzh = int(datetime.datetime.now(pytz.timezone('Europe/Brussels')).strftime("%z")[2:3])
+    starttime = starttime - datetime.timedelta(hours=tzh)
 
 cfg = my_env.init_env("vdab", __file__)
 logging.info("Start Application")
@@ -35,7 +41,8 @@ for fn in measurements:
     df = pandas.read_csv(ffp)
     df = df[df["value"] != "value"]
     # Convert objects to datetime and int
-    df = df.assign(t=pandas.to_datetime(df.t, unit="s"), value=pandas.to_numeric(df.value))
+    df = df.assign(t=pandas.to_datetime(df.t, unit="s"),
+                   value=pandas.to_numeric(df.value))
     if starttime:
         df = df[df["t"] > starttime]
         if duration:
@@ -44,7 +51,7 @@ for fn in measurements:
     plt.tick_params(axis="x", labelrotation=20)
     plt.plot(df.t, df.value)
     title = ft.replace("_", " ").replace(".", " ").title()
-    plt.title(title)
+    plt.title("{title} (UTC)".format(title=title))
     pffn = os.path.join(plot_dir, "{ft}.png".format(ft=ft))
     plt.savefig(pffn)
     plt.gcf().clear()
