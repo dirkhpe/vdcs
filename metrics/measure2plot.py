@@ -2,11 +2,26 @@
 This script will convert a metrics measurement file to a plot.
 """
 
+import argparse
+import datetime
 import logging
 import matplotlib.pyplot as plt
 import os
 import pandas
 from lib import my_env
+
+parser = argparse.ArgumentParser(
+    description="Convert Neo4J Measurement data to plots."
+)
+parser.add_argument('-s', '--startTime', required=False,
+                    type=lambda d: datetime.datetime.strptime(d, "%d/%m/%Y %H:%M"),
+                    help='Optional - add start time for plot interval. Format: "dd/mm/yyyy hh:mm" (remember quotes')
+parser.add_argument('-d', '--duration', type=int, required=False,
+                    help='Optional - add duration (hours) for plot interval.')
+args = parser.parse_args()
+
+starttime = args.startTime
+duration = args.duration
 
 cfg = my_env.init_env("vdab", __file__)
 logging.info("Start Application")
@@ -18,15 +33,18 @@ for fn in measurements:
     ft = fn[:-len(".csv")]
     ffp = os.path.join(fd, fn)
     df = pandas.read_csv(ffp)
-    # Remove lines with t, value - this is added on every restart of the server
-    cdf = df[df["value"] != "value"]
-    val_int = pandas.to_numeric(cdf["value"])
-    ts = pandas.to_datetime(cdf["t"], unit="s")
+    df = df[df["value"] != "value"]
+    # Convert objects to datetime and int
+    df = df.assign(t=pandas.to_datetime(df.t, unit="s"), value=pandas.to_numeric(df.value))
+    if starttime:
+        df = df[df["t"] > starttime]
+        if duration:
+            endtime = starttime + datetime.timedelta(hours=duration)
+            df = df[df["t"] <= endtime]
     plt.tick_params(axis="x", labelrotation=20)
-    plt.plot(ts, val_int)
+    plt.plot(df.t, df.value)
     title = ft.replace("_", " ").replace(".", " ").title()
     plt.title(title)
-    plt.legend()
     pffn = os.path.join(plot_dir, "{ft}.png".format(ft=ft))
     plt.savefig(pffn)
     plt.gcf().clear()
