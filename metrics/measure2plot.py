@@ -24,7 +24,7 @@ args = parser.parse_args()
 starttime = args.startTime
 duration = args.duration
 if starttime:
-    # Convert starttime to UTC, keep naive date time. 
+    # Convert starttime to UTC, keep naive date time.
     # Set timezone
     eu = pytz.timezone('Europe/Brussels')
     # Localize starttime
@@ -41,6 +41,7 @@ plot_dir = cfg["Metrics"]["plot_dir"]
 measurements = [fn for fn in os.listdir(fd) if fn[len(fn)-len(".csv"):] == ".csv"]
 for fn in measurements:
     ft = fn[:-len(".csv")]
+    logging.info("Working on {fn}".format(fn=fn))
     ffp = os.path.join(fd, fn)
     df = pandas.read_csv(ffp)
     df = df[df["value"] != "value"]
