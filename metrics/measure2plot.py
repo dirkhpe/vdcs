@@ -44,7 +44,11 @@ for fn in measurements:
     logging.info("Working on {fn}".format(fn=fn))
     ffp = os.path.join(fd, fn)
     df = pandas.read_csv(ffp)
-    df = df[df["value"] != "value"]
+    try:
+        df = df[df["value"] != "value"]
+    except TypeError:
+        # df["value"] is integer type
+        pass
     # Convert objects to datetime and int
     df = df.assign(t=pandas.to_datetime(df.t, unit="s"),
                    value=pandas.to_numeric(df.value))
