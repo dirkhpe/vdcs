@@ -24,10 +24,14 @@ args = parser.parse_args()
 starttime = args.startTime
 duration = args.duration
 if starttime:
-    # Convert starttime to UTC
+    # Convert starttime to UTC, keep naive date time. 
+    # Set timezone
+    eu = pytz.timezone('Europe/Brussels')
+    # Localize starttime
+    local_starttime = eu.localize(starttime)
     # Get timezone delta
-    tzh = int(datetime.datetime.now(pytz.timezone('Europe/Brussels')).strftime("%z")[2:3])
-    starttime = starttime - datetime.timedelta(hours=tzh)
+    tzd = int(local_starttime.strftime("%z")[2:3])
+    starttime = starttime - datetime.timedelta(hours=tzd)
 
 cfg = my_env.init_env("vdab", __file__)
 logging.info("Start Application")
