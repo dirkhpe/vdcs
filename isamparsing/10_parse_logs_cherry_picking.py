@@ -16,11 +16,8 @@ urlpath_starters = my_env.urlpath_starters
 def parse_line(fn, line_content):
     """
     This function will read every line in a log file and verify if the line needs to be kept.
-
     :param fn: Filename
-
     :param line_content: Line to be evaluated.
-
     :return:
     """
     try:
