@@ -17,6 +17,7 @@ wl_vindeenjob = ["arbeidsregime", "jobdomein", "ervaring", "arbeidscircuit", "ar
                  "diplomaniveau", "vakgebieden", "doelgroep", "leervorm", "lesvorm", "organisator",
                  "knelpuntberoep", "trefwoord"]
 
+
 def opleidingaanbod():
     """
     This method handles queries with urlpath starter /opleidingen/aanbod/. Third element in the path is the course ID
@@ -30,11 +31,12 @@ def opleidingaanbod():
     path = parse.urlparse(rec["urlpath"]).path
     path_arr = path.split("/")
     if len(path_arr) > 3:
-        courseId = path_arr[3]
-        if courseId:
-            course_node = course_obj.get_node(courseId)
+        course_id = path_arr[3]
+        if course_id:
+            course_node = course_obj.get_node(course_id)
             rel_obj.set(session_node, session2course, course_node, source=applicatie, ts=ts)
     return
+
 
 def vindeenjobopl():
     """
@@ -76,6 +78,7 @@ def vindeenjobopl():
             rel_obj.set(session_node, session2vacature, vac_node, source=applicatie, ts=ts)
     return
 
+
 def werkgever():
     """
     This method will find application and IKL. This will be linked to the session.
@@ -99,6 +102,7 @@ def werkgever():
             # Link ikl, timestamp, application name to session for werkgever
     return
 
+
 cfg = my_env.init_env("vdab", __file__)
 cs = my_env.cleanstr
 logging.info("Start Application")
@@ -116,6 +120,8 @@ for row in df.iterrows():
     uid = xl["uid"]
     ikl = xl["persoonId"]
     user_ext[cs(uid)] = ikl
+
+# Load Vacature Data
 
 urlpath_starters = my_env.urlpath_starters
 
@@ -169,6 +175,20 @@ for row in df.iterrows():
     )
     param_node, rel_type = param_obj.get_node(pardic)
 
+# Then add Vacature nodes containing IDs and Titles.
+# Todo: delimiter is pipe symbol
+# Todo: Ctrl-M as line delimiter
+# Todo: Quotes around title.
+vacature_file = cfg["Main"]["vacature_titels"]
+df = pandas.read_csv(vacature_file, skiprows=1)
+for row in df.iterrows():
+    # Get csv line in dict format
+    xl = row[1].to_dict()
+    vac_id = xl["ID"]
+    title = xl["FUNCTIE_NAAM"]
+    if not vacature_obj.get_node(vac_id, title):
+        msg = "Line could not be added: ID: {vac_id}, Title: {title}".format(vac_id=vac_id, title=title)
+        logging.error(msg)
 
 # Now handle all log records.
 query = """

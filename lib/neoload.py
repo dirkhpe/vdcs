@@ -11,6 +11,7 @@ from lib import my_env
 
 cs = my_env.cleanstr
 
+
 class Application:
     def __init__(self, repo):
         self.applications = repo["application"]
@@ -37,8 +38,10 @@ class Application:
     def get_application_name(appl_name):
         return cs(appl_name).replace(" ", "")
 
+
 def get_applications_header():
     return [":LABEL", ":ID", "naam"]
+
 
 class Clientip:
     def __init__(self, repo):
@@ -57,8 +60,10 @@ class Clientip:
     def get_id(rec):
         return "{lbl}|{val}".format(lbl=lbl_clientip, val=cs(rec["clientip"]))
 
+
 def get_clientips_header():
     return [":LABEL", ":ID", "adres"]
+
 
 class Competentie:
     def __init__(self, repo):
@@ -103,6 +108,7 @@ class Competentie:
 def get_competenties_header():
     return [":LABEL", ":ID", "competentieID", "Beschrijving"]
 
+
 class Course:
     def __init__(self, repo):
         self.courses = repo["course"]
@@ -142,6 +148,7 @@ class Course:
 def get_courses_header():
     return [":LABEL", ":ID", "opleidingID"]
 
+
 class Ikl:
     def __init__(self, repo):
         self.ikls = repo["ikl"]
@@ -180,6 +187,7 @@ class Ikl:
 
 def get_ikls_header():
     return [":LABEL", ":ID", "ikl"]
+
 
 class Param:
     def __init__(self, repo):
@@ -249,8 +257,10 @@ class Param:
         else:
             return False
 
+
 def get_params_header():
     return [":LABEL", ":ID", "naam", "waarde", "code", "applicatie"]
+
 
 class Relation:
     def __init__(self, repo):
@@ -291,7 +301,7 @@ class Relation:
 
     @staticmethod
     def get_rel_props(start_node, relation, end_node, source, ts, score):
-        props = {":START_ID": start_node, ":END_ID":end_node, ":TYPE": relation}
+        props = {":START_ID": start_node, ":END_ID": end_node, ":TYPE": relation}
         if source:
             props["source"] = source
         if ts:
@@ -299,7 +309,6 @@ class Relation:
         if score:
             props["score"] = score
         return props
-
 
     def populate_repo(self, cfg):
         """
@@ -321,6 +330,7 @@ class Relation:
                                              row["ts:datetime"], row["score"])
                     self.relations[rel_id] = dict(row)
         return
+
 
 def get_relations_header():
     return [":START_ID", ":END_ID", ":TYPE", "source", "ts:datetime", "score"]
@@ -360,8 +370,10 @@ class Session:
     def get_id(rec):
         return "{lbl}|{val}".format(lbl=lbl_session, val=cs(rec["sid"]))
 
+
 def get_sessions_header():
     return [":LABEL", ":ID", "sessieID", "start:datetime", "stop:datetime", "aantalPaginas", "duur", "bot"]
+
 
 class User:
     def __init__(self, repo):
@@ -385,8 +397,10 @@ class User:
     def get_id(uid):
         return "{lbl}|{val}".format(lbl=lbl_user, val=cs(uid))
 
+
 def get_users_header():
     return [":LABEL", ":ID", "naam", "group"]
+
 
 class Vacature:
     def __init__(self, repo):
@@ -396,20 +410,19 @@ class Vacature:
         self.vacatures[node_id]["titel"] = title
         return
 
-    def get_node(self, vac_id):
+    def get_node(self, vac_id, title=""):
         """
         This method will return the node ID for the Vacature, or False if vacature ID is not integer with length of 8.
         In case that the vacature ID does not exist, it will be added.
-
-        :param vac_id:
-
-        :return:
+        :param vac_id: Vacature ID, needs to be an integer
+        :param title: Optional, Title of the vacature. This will be used only in case of new vacatures.
+        :return: Node ID, or False if this is not a valid vacature.
         """
         node_id = self.get_id(vac_id)
         if node_id:
             if node_id not in self.vacatures:
                 lbl = lbl_vacature
-                props = {":ID": node_id, ":LABEL": lbl, "vacatureID": vac_id, "titel": ""}
+                props = {":ID": node_id, ":LABEL": lbl, "vacatureID": vac_id, "titel": title}
                 self.vacatures[node_id] = props
             return node_id
         else:
@@ -418,17 +431,18 @@ class Vacature:
     @staticmethod
     def get_id(vac_id):
         """
-        This method will return the node ID for the Vacature, or False if vacature ID is not integer with length of 8.
+        This method will return the node ID for the Vacature, or False if vacature ID is not integer
+        In previous releases the vacature ID should be 8 long. This requirement is dropped since the source 'vacature
+        titels' has IDs that are not 8 long.
 
         :param vac_id:
 
         :return: node ID for the vacature or False.
         """
-        if vac_id.isdigit() and len(vac_id) == 8:
+        if vac_id.isdigit():
             return "{lbl}|{val}".format(lbl=lbl_vacature, val=vac_id)
         else:
             return False
-
 
     def populate_repo(self, cfg):
         """
@@ -452,6 +466,7 @@ class Vacature:
 
 def get_vacatures_header():
     return [":LABEL", ":ID", "vacatureID", "titel"]
+
 
 class Visitor:
     def __init__(self, repo):
@@ -483,8 +498,10 @@ class Visitor:
     def get_id(rec):
         return "{lbl}|{val}".format(lbl=lbl_visitor, val=cs(rec["vid"]))
 
+
 def get_visitors_header():
     return [":LABEL", ":ID", "visitorID"]
+
 
 class Vhost:
     def __init__(self, repo):
@@ -501,6 +518,7 @@ class Vhost:
     @staticmethod
     def get_id(rec):
         return "{lbl}|{val}".format(lbl=lbl_vhost, val=cs(rec["vhost"]))
+
 
 def get_vhosts_header():
     return [":LABEL", ":ID", "host"]
