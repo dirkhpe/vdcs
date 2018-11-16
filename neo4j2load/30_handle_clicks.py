@@ -176,19 +176,20 @@ for row in df.iterrows():
     param_node, rel_type = param_obj.get_node(pardic)
 
 # Then add Vacature nodes containing IDs and Titles.
-# Todo: delimiter is pipe symbol
-# Todo: Ctrl-M as line delimiter
-# Todo: Quotes around title.
 vacature_file = cfg["Main"]["vacature_titels"]
-df = pandas.read_csv(vacature_file, skiprows=1)
-for row in df.iterrows():
-    # Get csv line in dict format
-    xl = row[1].to_dict()
-    vac_id = xl["ID"]
-    title = xl["FUNCTIE_NAAM"]
-    if not vacature_obj.get_node(vac_id, title):
-        msg = "Line could not be added: ID: {vac_id}, Title: {title}".format(vac_id=vac_id, title=title)
-        logging.error(msg)
+csv.register_dialect('pipedelim', delimiter='|')
+with open(vacature_file, newline='\r\n', encoding="iso-8859-1") as f:
+    reader = csv.DictReader(f, dialect='pipedelim')
+    li = my_env.LoopInfo("Vacature Titles", 10000)
+    for row in reader:
+        li.info_loop()
+        vacid = row["ID"]
+        # Titel field can contain \n or \r\n (^M and/or newline in output).
+        title = row["FUNCTIE_NAAM"].replace("\r", "").replace("\n", " ")
+        if not vacature_obj.get_node(vacid, title):
+            msg = "Line could not be added: ID: {vac_id}, Title: {title}".format(vac_id=vacid, title=title)
+            logging.error(msg)
+    li.end_loop()
 
 # Now handle all log records.
 query = """

@@ -10,19 +10,16 @@ vacatures = {}
 repo = dict(vacature=vacatures)
 vacature_obj = nl.Vacature(repo)
 # Then add Vacature nodes containing IDs and Titles.
-# Todo: delimiter is pipe symbol
-# Todo: Ctrl-M as line delimiter
-# Todo: Quotes around title.
 vacature_file = cfg["Main"]["vacature_titels"]
 csv.register_dialect('pipedelim', delimiter='|')
-with open(vacature_file, newline='\r\n') as f:
+with open(vacature_file, newline='\r\n', encoding="iso-8859-1") as f:
     reader = csv.DictReader(f, dialect='pipedelim')
     li = my_env.LoopInfo("Vacature Titles", 10000)
     for row in reader:
-        if li.info_loop() > 1000:
-            break
+        li.info_loop()
         vac_id = row["ID"]
-        title = row["FUNCTIE_NAAM"].strip()
+        # Titel can contain \n - this will cause \r\n (^M in output).
+        title = row["FUNCTIE_NAAM"].replace("\r", "").replace("\n", " ")
         if not vacature_obj.get_node(vac_id, title):
             msg = "Line could not be added: ID: {vac_id}, Title: {title}".format(vac_id=vac_id, title=title)
             logging.error(msg)
