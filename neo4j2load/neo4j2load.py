@@ -13,6 +13,7 @@ scripts = [
     "40_opleiding_competenties",
     "50_vacature_competenties",
     "60_burger_competenties",
+    #    "70_competentie_competentie",
     "90_load_neo4j"
     ]
 

@@ -17,6 +17,7 @@ lbl_visitor = "Visitor"
 lbl_zoekwoord = "Zoekwoord"
 
 # Relations
+competentie2competentie = "affiniteit"
 course2competentie = "verkregenCompetentie"
 ikl2competentie = "heeftCompetentie"
 ikl2user = "heeftUsername"
